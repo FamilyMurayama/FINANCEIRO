@@ -5,7 +5,7 @@
 // (ex: https://seu-backend.onrender.com/api). Sem isso, usa localhost — bom
 // para desenvolver na sua máquina.
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3333/api";
-export const PLUGGY_CONNECT_SCRIPT_URL = "https://cdn.pluggy.ai/pluggy-connect/latest/pluggy-connect.js
+export const PLUGGY_CONNECT_SCRIPT_URL = "https://cdn.pluggy.ai/pluggy-connect/latest/pluggy-connect.js";
 export const CLASSES = [
   { key: "acoes", label: "Ações", color: "#E8604C" },
   { key: "fiis", label: "FIIs", color: "#D4AF7A" },
