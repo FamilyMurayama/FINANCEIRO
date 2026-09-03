@@ -13,7 +13,7 @@ async function dispararNotificacao(alerta, variacaoAtual) {
   const chatId = process.env.TELEGRAM_CHAT_ID;
   if (!token || !chatId) return;
 
-  try {
+    try {
     await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
       chat_id: chatId,
       text: texto,
@@ -21,10 +21,6 @@ async function dispararNotificacao(alerta, variacaoAtual) {
   } catch (err) {
     console.error("Erro ao enviar notificação no Telegram:", err.message);
   }
-}
-
-}
-
 }
 
 async function checarAcoesEFiis(alertasAcoes) {
@@ -38,7 +34,7 @@ async function checarAcoesEFiis(alertasAcoes) {
       const alerta = alertasAcoes.find((a) => a.ticker === cotacao.ticker);
       if (!alerta) return;
       if (cotacao.variacaoPct <= alerta.limiteQuedaPct || cotacao.variacaoPct >= alerta.limiteAltaPct) {
-        dispararNotificacao(alerta, cotacao.variacaoPct);
+        await dispararNotificacao(alerta, cotacao.variacaoPct);
       }
     });
   } catch (err) {
@@ -57,7 +53,7 @@ async function checarCripto(alertasCripto) {
       const alerta = alertasCripto.find((a) => a.ticker === preco.symbol);
       if (!alerta) return;
       if (preco.variacaoPct <= alerta.limiteQuedaPct || preco.variacaoPct >= alerta.limiteAltaPct) {
-        dispararNotificacao(alerta, preco.variacaoPct);
+        await dispararNotificacao(alerta, preco.variacaoPct);
       }
     });
   } catch (err) {
