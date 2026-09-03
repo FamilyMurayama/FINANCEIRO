@@ -2,15 +2,27 @@ import cron from "node-cron";
 import axios from "axios";
 import { listarAlertas } from "./alertStore.js";
 
-// Troque por push notification real (Firebase Cloud Messaging / OneSignal)
-// ou envio de e-mail/SMS quando um limite é ultrapassado.
-function dispararNotificacao(alerta, variacaoAtual) {
+async function dispararNotificacao(alerta, variacaoAtual) {
   const direcao = variacaoAtual <= alerta.limiteQuedaPct ? "caiu" : "subiu";
-  console.log(
+  const texto =
     `🔔 ALERTA: ${alerta.ticker} ${direcao} ${variacaoAtual.toFixed(2)}% ` +
-      `(limite configurado: queda ${alerta.limiteQuedaPct}% / alta ${alerta.limiteAltaPct}%)`
-  );
-  // TODO: enviar push notification real para o app do usuário aqui
+    `(limite configurado: queda ${alerta.limiteQuedaPct}% / alta ${alerta.limiteAltaPct}%)`;
+  console.log(texto);
+
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return;
+
+  try {
+    await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
+      chat_id: chatId,
+      text: texto,
+    });
+  } catch (err) {
+    console.error("Erro ao enviar notificação no Telegram:", err.message);
+  }
+}
+
 }
 
 }
