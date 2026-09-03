@@ -10,6 +10,7 @@ import {
 import CarteiraPage from "./CarteiraPage.jsx";
 import ProventosPage from "./ProventosPage.jsx";
 import RendimentoAnualPage from "./RendimentoAnualPage.jsx";
+import AlertasPage from "./AlertasPage.jsx";
 
 const TICKERS_ACOES_FIIS_DEMO = ["PETR4", "ITSA4", "MXRF11", "HGLG11"];
 const PARES_CRIPTO_DEMO = ["BTCBRL", "ETHBRL"];
