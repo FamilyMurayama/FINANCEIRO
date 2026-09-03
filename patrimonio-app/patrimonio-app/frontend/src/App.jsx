@@ -191,8 +191,8 @@ const ABAS = [
   { key: "carteira", label: "Carteira", Icone: Wallet },
   { key: "proventos", label: "Proventos", Icone: Coins },
   { key: "rendimento", label: "Rendimento", Icone: TrendingUp },
-];
   { key: "alertas", label: "Alertas", Icone: Bell },
+];
 
 export default function App() {
   const [abaAtiva, setAbaAtiva] = useState("carteira");
