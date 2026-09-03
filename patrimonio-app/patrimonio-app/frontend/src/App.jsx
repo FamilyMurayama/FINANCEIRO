@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Wallet, Coins, TrendingUp, ChevronRight, Check, Loader2 } from "lucide-react";
+import { Wallet, Coins, TrendingUp, Bell, ChevronRight, Check, Loader2 } from "lucide-react";
 import {
   API_BASE_URL,
   PLUGGY_CONNECT_SCRIPT_URL,
@@ -192,6 +192,7 @@ const ABAS = [
   { key: "proventos", label: "Proventos", Icone: Coins },
   { key: "rendimento", label: "Rendimento", Icone: TrendingUp },
 ];
+  { key: "alertas", label: "Alertas", Icone: Bell },
 
 export default function App() {
   const [abaAtiva, setAbaAtiva] = useState("carteira");
@@ -238,7 +239,8 @@ export default function App() {
         />
       )}
       {abaAtiva === "proventos" && <ProventosPage tickers={tickers} />}
-      {abaAtiva === "rendimento" && <RendimentoAnualPage ativos={ativos} />}
+      {abaAtiva === "alertas" && <AlertasPage />}
+
 
       <div style={styles.tabBar}>
         {ABAS.map(({ key, label, Icone }) => (
