@@ -1,18 +1,27 @@
-// Armazenamento em memória para simplificar o exemplo.
-// Em produção, troque por um banco (Postgres, SQLite, etc.) por usuário.
+import { Router } from "express";
+import { listarAlertas, salvarAlerta, removerAlerta } from "../services/alertStore.js";
 
-const alertas = new Map();
+const router = Router();
 
-export function listarAlertas() {
-  return Array.from(alertas.values());
-}
+// GET /api/alerts — lista os limites configurados
+router.get("/", async (_req, res) => {
+  res.json(await listarAlertas());
+});
 
-export function salvarAlerta({ ticker, tipo, limiteQuedaPct = -3, limiteAltaPct = 5 }) {
-  const alerta = { ticker: ticker.toUpperCase(), tipo, limiteQuedaPct, limiteAltaPct };
-  alertas.set(alerta.ticker, alerta);
-  return alerta;
-}
+// POST /api/alerts
+// body: { ticker: "PETR4", tipo: "acao" | "cripto", limiteQuedaPct: -3, limiteAltaPct: 5 }
+router.post("/", async (req, res) => {
+  const { ticker, tipo, limiteQuedaPct, limiteAltaPct } = req.body;
+  if (!ticker || !tipo) return res.status(400).json({ error: "ticker e tipo são obrigatórios" });
 
-export function removerAlerta(ticker) {
-  alertas.delete(ticker.toUpperCase());
-}
+  const alerta = await salvarAlerta({ ticker, tipo, limiteQuedaPct, limiteAltaPct });
+  res.status(201).json(alerta);
+});
+
+// DELETE /api/alerts/:ticker
+router.delete("/:ticker", async (req, res) => {
+  await removerAlerta(req.params.ticker);
+  res.status(204).send();
+});
+
+export default router;
