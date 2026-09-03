@@ -13,6 +13,8 @@ function dispararNotificacao(alerta, variacaoAtual) {
   // TODO: enviar push notification real para o app do usuário aqui
 }
 
+}
+
 async function checarAcoesEFiis(alertasAcoes) {
   if (alertasAcoes.length === 0) return;
   const tickers = alertasAcoes.map((a) => a.ticker).join(",");
