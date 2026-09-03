@@ -54,7 +54,7 @@ async function checarCripto(alertasCripto) {
 export function startAlertWatcher() {
   // Roda a cada 5 minutos. Ajuste conforme o limite de chamadas das APIs usadas.
   cron.schedule("*/5 * * * *", async () => {
-    const alertas = listarAlertas();
+    const alertas = await listarAlertas();
     await checarAcoesEFiis(alertas.filter((a) => a.tipo === "acao" || a.tipo === "fii"));
     await checarCripto(alertas.filter((a) => a.tipo === "cripto"));
   });
