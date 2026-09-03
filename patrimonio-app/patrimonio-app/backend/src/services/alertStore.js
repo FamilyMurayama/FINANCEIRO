@@ -1,27 +1,32 @@
-import { Router } from "express";
-import { listarAlertas, salvarAlerta, removerAlerta } from "../services/alertStore.js";
+import axios from "axios";
 
-const router = Router();
+const BASE = process.env.UPSTASH_REDIS_REST_URL;
+const TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-// GET /api/alerts — lista os limites configurados
-router.get("/", async (_req, res) => {
-  res.json(await listarAlertas());
-});
+async function redis(path) {
+  const { data } = await axios.get(`${BASE}${path}`, {
+    headers: { Authorization: `Bearer ${TOKEN}` },
+  });
+  return data.result;
+}
 
-// POST /api/alerts
-// body: { ticker: "PETR4", tipo: "acao" | "cripto", limiteQuedaPct: -3, limiteAltaPct: 5 }
-router.post("/", async (req, res) => {
-  const { ticker, tipo, limiteQuedaPct, limiteAltaPct } = req.body;
-  if (!ticker || !tipo) return res.status(400).json({ error: "ticker e tipo são obrigatórios" });
+export async function listarAlertas() {
+  if (!BASE || !TOKEN) return [];
+  const tickers = (await redis(`/smembers/alertas:tickers`)) || [];
+  if (tickers.length === 0) return [];
+  const valores = await Promise.all(tickers.map((t) => redis(`/get/alerta:${t}`)));
+  return valores.filter(Boolean).map((v) => JSON.parse(v));
+}
 
-  const alerta = await salvarAlerta({ ticker, tipo, limiteQuedaPct, limiteAltaPct });
-  res.status(201).json(alerta);
-});
+export async function salvarAlerta({ ticker, tipo, limiteQuedaPct = -3, limiteAltaPct = 5 }) {
+  const alerta = { ticker: ticker.toUpperCase(), tipo, limiteQuedaPct, limiteAltaPct };
+  await redis(`/sadd/alertas:tickers/${alerta.ticker}`);
+  await redis(`/set/alerta:${alerta.ticker}/${encodeURIComponent(JSON.stringify(alerta))}`);
+  return alerta;
+}
 
-// DELETE /api/alerts/:ticker
-router.delete("/:ticker", async (req, res) => {
-  await removerAlerta(req.params.ticker);
-  res.status(204).send();
-});
-
-export default router;
+export async function removerAlerta(ticker) {
+  const t = ticker.toUpperCase();
+  await redis(`/srem/alertas:tickers/${t}`);
+  await redis(`/del/alerta:${t}`);
+}
