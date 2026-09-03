@@ -30,7 +30,7 @@ async function checarAcoesEFiis(alertasAcoes) {
     const { data } = await axios.get(`http://localhost:${process.env.PORT || 3333}/api/quotes`, {
       params: { tickers },
     });
-    data.forEach((cotacao) => {
+    data.forEach(async (cotacao) => {
       const alerta = alertasAcoes.find((a) => a.ticker === cotacao.ticker);
       if (!alerta) return;
       if (cotacao.variacaoPct <= alerta.limiteQuedaPct || cotacao.variacaoPct >= alerta.limiteAltaPct) {
@@ -49,7 +49,7 @@ async function checarCripto(alertasCripto) {
     const { data } = await axios.get(`http://localhost:${process.env.PORT || 3333}/api/binance/prices`, {
       params: { symbols },
     });
-    data.forEach((preco) => {
+    data.forEach(async (preco) => {
       const alerta = alertasCripto.find((a) => a.ticker === preco.symbol);
       if (!alerta) return;
       if (preco.variacaoPct <= alerta.limiteQuedaPct || preco.variacaoPct >= alerta.limiteAltaPct) {
