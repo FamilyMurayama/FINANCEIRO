@@ -238,9 +238,9 @@ export default function App() {
           onAbrirConexoes={() => setMostrarConexoes(true)}
         />
       )}
-      {abaAtiva === "proventos" && <ProventosPage tickers={tickers} />}
-{abaAtiva === "rendimento" && <RendimentoAnualPage ativos={ativos} />}
-{abaAtiva === "alertas" && <AlertasPage />}
+      {abaAtiva === "proventos" && <ProventosPage tickers={tickers} classes={tickers.map((t) => ativos.find((a) => a.ticker === t)?.classe)} />}
+      {abaAtiva === "rendimento" && <RendimentoAnualPage ativos={ativos} />}
+      {abaAtiva === "alertas" && <AlertasPage />}
 
       <div style={styles.tabBar}>
         {ABAS.map(({ key, label, Icone }) => (
