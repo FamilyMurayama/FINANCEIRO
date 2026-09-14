@@ -1,37 +1,60 @@
 import { Router } from "express";
 import axios from "axios";
+import * as cheerio from "cheerio";
 const router = Router();
 
 // GET /api/dividends?tickers=PETR4,MXRF11
-// Usa o módulo "dividends" da brapi.dev, que traz o histórico de proventos
-// pagos (dividendo, JCP, rendimento de FII) por ativo.
+// Fonte: fundamentus.com.br (scraping da página pública de proventos).
+// Não exige token, mas é sensível a mudanças no layout do site.
+async function buscarProventosFundamentus(ticker) {
+  const url = `https://www.fundamentus.com.br/proventos.php?papel=${ticker}&tipo=2`;
+  const { data: html } = await axios.get(url, {
+    headers: {
+      // Fundamentus bloqueia requisições sem um User-Agent de navegador
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+    },
+    timeout: 10000,
+  });
+
+  const $ = cheerio.load(html);
+  const proventos = [];
+
+  $("table.data tbody tr").each((_, linha) => {
+    const colunas = $(linha).find("td").map((__, td) => $(td).text().trim()).get();
+    // Colunas típicas: [Data, Valor, Data de Pagamento, Tipo] — pode variar
+    if (colunas.length >= 3) {
+      const [dataComData, valorTexto, dataPagamento, tipo] = colunas;
+      const valorPorCota = parseFloat(valorTexto.replace(",", "."));
+      if (!isNaN(valorPorCota)) {
+        proventos.push({
+          ticker,
+          tipo: tipo || "Provento",
+          valorPorCota,
+          dataComData,
+          dataPagamento: dataPagamento || dataComData,
+        });
+      }
+    }
+  });
+
+  return proventos;
+}
+
 router.get("/", async (req, res) => {
   const tickers = (req.query.tickers || "").toString().split(",").filter(Boolean);
   if (tickers.length === 0) return res.status(400).json({ error: "Informe ?tickers=PETR4,MXRF11" });
+
   try {
     const requisicoes = tickers.map((ticker) =>
-      axios
-        .get(`https://brapi.dev/api/quote/${ticker}`, {
-          params: { token: process.env.BRAPI_TOKEN, dividends: "true" },
-        })
-        .then((r) => ({ ticker, resultado: r.data.results?.[0] }))
-        .catch((e) => {
-          console.error(`Erro ao buscar dividendos de ${ticker}:`, e.response?.status, e.response?.data || e.message);
-          return { ticker, resultado: null };
-        })
+      buscarProventosFundamentus(ticker).catch((e) => {
+        console.error(`Erro ao buscar proventos de ${ticker} (Fundamentus):`, e.message);
+        return [];
+      })
     );
-    const respostas = await Promise.all(requisicoes);
-    const proventos = respostas.flatMap(({ ticker, resultado }) => {
-      const historico = resultado?.dividendsData?.cashDividends || [];
-      return historico.map((d) => ({
-        ticker,
-        tipo: d.label || "Provento", // ex: "DIVIDENDO", "JCP", "RENDIMENTO"
-        valorPorCota: d.rate,
-        dataComData: d.lastDatePriorEx, // data-com (precisa ter o ativo até aqui)
-        dataPagamento: d.paymentDate,
-      }));
-    });
-    // Mais recente primeiro
+    const resultados = await Promise.all(requisicoes);
+    const proventos = resultados.flat();
+
     proventos.sort((a, b) => new Date(b.dataPagamento) - new Date(a.dataPagamento));
     res.json(proventos);
   } catch (err) {
