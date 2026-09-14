@@ -240,7 +240,9 @@ export default function App() {
       )}
       {abaAtiva === "proventos" && <ProventosPage tickers={tickers} />}
       {abaAtiva === "alertas" && <AlertasPage />}
-
+{abaAtiva === "proventos" && <ProventosPage tickers={tickers} />}
+{abaAtiva === "rendimento" && <RendimentoAnualPage ativos={ativos} />}
+{abaAtiva === "alertas" && <AlertasPage />}
 
       <div style={styles.tabBar}>
         {ABAS.map(({ key, label, Icone }) => (
