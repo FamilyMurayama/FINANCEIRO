@@ -1,19 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { Coins, Calendar } from "lucide-react";
-import { API_BASE_URL, styles, formatBRL, formatData, SUBTLE, COLOR_UP, GOLD, LINE } from "./shared.js";
-
-// Cor por tipo de provento — ajuda a diferenciar dividendo/JCP/rendimento de FII num relance.
-const CORES_TIPO = {
-  DIVIDENDO: COLOR_UP,
-  JCP: GOLD,
-  RENDIMENTO: "#6E9BD9",
-};
-function corDoTipo(tipo) {
-  const chave = (tipo || "").toUpperCase();
-  return CORES_TIPO[chave] || SUBTLE;
-}
-
-export default function ProventosPage({ tickers }) {
+export default function ProventosPage({ tickers, classes = [] }) {
   const [proventos, setProventos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(false);
@@ -24,7 +9,11 @@ export default function ProventosPage({ tickers }) {
       return;
     }
     setCarregando(true);
-    fetch(`${API_BASE_URL}/dividends?tickers=${tickers.join(",")}`)
+    const params = new URLSearchParams({
+      tickers: tickers.join(","),
+      classes: classes.join(","),
+    });
+    fetch(`${API_BASE_URL}/dividends?${params.toString()}`)
       .then((r) => {
         if (!r.ok) throw new Error();
         return r.json();
@@ -35,7 +24,7 @@ export default function ProventosPage({ tickers }) {
       })
       .catch(() => setErro(true))
       .finally(() => setCarregando(false));
-  }, [tickers]);
+  }, [tickers, classes]);
 
   const hoje = new Date();
   const anoAtual = hoje.getFullYear();
