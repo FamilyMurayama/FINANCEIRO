@@ -155,7 +155,10 @@ function useCotacoes(ativosReais) {
 
   const buscar = useCallback(async () => {
     try {
-      const tickers = [...new Set(ativosReais.filter((a) => a.classe === "acoes" || a.classe === "fiis").map((a) => a.ticker))];
+      const tickers = useMemo(
+  () => [...new Set(ativos.filter((a) => a.classe === "acoes" || a.classe === "fiis").map((a) => a.ticker))],
+  [ativos]
+);
       const cripto = [...new Set(ativosReais.filter((a) => a.classe === "cripto").map((a) => a.ticker))];
       const novasCotacoes = {};
 
