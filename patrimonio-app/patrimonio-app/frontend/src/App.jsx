@@ -221,9 +221,14 @@ export default function App() {
   );
 
   const tickers = useMemo(
-    () => [...new Set(ativos.filter((a) => a.classe === "acoes" || a.classe === "fiis").map((a) => a.ticker))],
-    [ativos]
-  );
+  () => [...new Set(ativos.filter((a) => a.classe === "acoes" || a.classe === "fiis").map((a) => a.ticker))],
+  [ativos]
+);
+
+const classesTickers = useMemo(
+  () => tickers.map((t) => ativos.find((a) => a.ticker === t)?.classe || "acoes"),
+  [tickers, ativos]
+);
 
   const toggleBanco = (nome) => (bancosConectados.includes(nome) ? desconectar(nome) : conectar(nome));
 
