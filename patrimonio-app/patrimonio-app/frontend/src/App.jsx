@@ -246,7 +246,7 @@ const classesTickers = useMemo(
           onAbrirConexoes={() => setMostrarConexoes(true)}
         />
       )}
-      {abaAtiva === "proventos" && <ProventosPage tickers={tickers} classes={tickers.map((t) => ativos.find((a) => a.ticker === t)?.classe)} />}
+      {abaAtiva === "proventos" && <ProventosPage tickers={tickers} classes={classesTickers} />}
       {abaAtiva === "rendimento" && <RendimentoAnualPage ativos={ativos} />}
       {abaAtiva === "alertas" && <AlertasPage />}
 
